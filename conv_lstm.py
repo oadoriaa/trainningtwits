@@ -150,7 +150,7 @@ def model_twitter_convnet(embedding_matrix, maxlen):
 
     x = layers.Flatten(name='flatten_1')(x)
 
-    x = layers.Dense(256, activation='tanh')(x)
+    x = layers.Dense(128, activation='tanh')(x)
     x = layers.Dropout(0.5, name='dropout_3')(x)
 
     x = layers.Dense(128, activation='tanh')(x)
@@ -166,7 +166,7 @@ def model_twitter_convnet(embedding_matrix, maxlen):
 
 if __name__ == '__main__':
     ## Setting up names
-    network_name = 'conv_smaller_2'  # 'conv_lstm'
+    network_name = 'conv_smaller_3'  # 'conv_lstm'
     sufix = '10000_100'
     network_final_name = network_name + '_' + sufix
 
