@@ -154,7 +154,11 @@ def model_twitter_convnet(embedding_matrix, maxlen):
 
     x = layers.Dense(1, name = 'dense_final', activation='sigmoid')(x)
 
+<<<<<<< HEAD
     model = Model(input_twitter, x)
+=======
+    model = Model(input_twitter,x)
+>>>>>>> cb06185bcdabf3f8f0ee2ef083e0ac966f0220ee
     model.compile(optimizer=Adam(lr=0.0001, decay=1e-6), loss='binary_crossentropy', metrics=['acc'])
     print(model.summary())
     return model
