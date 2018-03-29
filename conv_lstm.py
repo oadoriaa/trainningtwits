@@ -116,7 +116,7 @@ def model_twitter_convnet_lstm(embedding_matrix, maxlen):
                                          name = 'lstm_2'))(x)
     x = layers.Activation('elu', name = 'act_elu_4')(x)
 
-    x = layers.Dense(1, name = 'dense_final')(x)
+    x = layers.Dense(1, name = 'dense_final', activation='sigmoid')(x)
 
     model = Model(input_twitter,x)
     model.compile(optimizer=Adam(lr=0.0001, decay=1e-6), loss='binary_crossentropy', metrics = ['acc'])
@@ -124,23 +124,61 @@ def model_twitter_convnet_lstm(embedding_matrix, maxlen):
     return model
 
 
+def model_twitter_convnet(embedding_matrix, maxlen):
+    input_twitter = layers.Input(shape = (maxlen,),dtype='int32',name = 'input_twitter')
+    x = layers.Embedding(embedding_matrix.shape[0],
+                         embedding_matrix.shape[1],
+                         input_length=maxlen,
+                         trainable = True,
+                         weights = [embedding_matrix],
+                         mask_zero = False,
+                         name = 'embedded')(input_twitter)
+
+    x = layers.Conv1D(32, (3), activation='elu', padding='same', kernel_initializer='orthogonal', name='conv1d_1')(x)
+    x = layers.Conv1D(32, (3), activation='elu', padding='same', kernel_initializer='orthogonal', name='conv1d_2')(x)
+    x = layers.Conv1D(32, (3), activation='elu', padding='same', kernel_initializer='orthogonal', name='conv1d_3')(x)
+    x = layers.Conv1D(32, (3), activation='elu', padding='same', kernel_initializer='orthogonal', name='conv1d_4')(x)
+    x = layers.Dropout(0.25, name = 'dropout_1')(x)
+
+    x = layers.Conv1D(32, (2), activation='elu', padding='same', kernel_initializer='orthogonal', name='conv1d_5')(x)
+    x = layers.Conv1D(32, (2), activation='elu', padding='same', kernel_initializer='orthogonal', name='conv1d_6')(x)
+    x = layers.Conv1D(32, (2), activation='elu', padding='same', kernel_initializer='orthogonal', name='conv1d_7')(x)
+    x = layers.Conv1D(32, (2), activation='elu', padding='same', kernel_initializer='orthogonal', name='conv1d_8')(x)
+    x = layers.Dropout(0.25, name = 'dropout_2')(x)
+
+    x = layers.Flatten(name = 'flatten_1')(x)
+
+    x = layers.Dense(256, activation='tanh')(x)
+    x = layers.Dense(256, activation='tanh')(x)
+    x = layers.Dropout(0.5, name = 'dropout_3')(x)
+
+    x = layers.Dense(1, name = 'dense_final', activation='sigmoid')(x)
+
+    model = Model(input_twitter,x)
+    model.compile(optimizer=Adam(lr=0.0001, decay=1e-6), loss='binary_crossentropy', metrics=['acc'])
+    print(model.summary())
+    return model
+
+
 if __name__ == '__main__':
     ## Load Data
-    sufix = '100000_100'
+    sufix = '10000_100'
+    network_name = 'conv' #'conv_lstm'
+
     embedding_matrix = load_embedding_matrix(h5filename = 'embedding_matrix_'+sufix+'_twitter.h5')
     maxlen = 32
-    model_conv_lstm = model_twitter_convnet_lstm(embedding_matrix, maxlen)
+    model_conv = model_twitter_convnet(embedding_matrix, maxlen)
     data,labels = load_twitter_data()
     X_train, X_val, Y_train, Y_val = get_train_test_datasets(data,labels)
 
     ## Train Network
-    hist_conv_lstm = model_conv_lstm.fit(X_train,
+    hist_conv_lstm = model_conv.fit(X_train,
                                          Y_train,
                                          epochs = 10,
                                          batch_size = 64,
                                          validation_data=(X_val,Y_val),
                                          verbose=True)
 
-    get_model_results(hist_conv_lstm, 'conv_lstm_'+sufix)
-    saving_model_into_disk(model_conv_lstm,'conv_lstm_'+sufix)
+    saving_model_into_disk(model_conv_lstm,network_name+sufix)
+    get_model_results(hist_conv_lstm, network_name+sufix)
 
