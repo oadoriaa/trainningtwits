@@ -135,26 +135,20 @@ def model_twitter_convnet(embedding_matrix, maxlen):
                          mask_zero=False,
                          name='embedded')(input_twitter)
 
-    x = layers.Conv1D(32, (3), activation='elu', padding='same', kernel_initializer='orthogonal', name='conv1d_1')(x)
-    x = layers.Conv1D(32, (3), activation='elu', padding='same', kernel_initializer='orthogonal', name='conv1d_2')(x)
-    x = layers.Conv1D(32, (3), activation='elu', padding='same', kernel_initializer='orthogonal', name='conv1d_3')(x)
-    x = layers.Conv1D(32, (3), activation='elu', padding='same', kernel_initializer='orthogonal', name='conv1d_4')(x)
-    x = layers.MaxPool1D(2, name='maxpool_2')(x)
+    x = layers.Conv1D(32, 3, activation='elu', padding='same', kernel_initializer='Orthogonal', name='conv1d_1')(x)
+    x = layers.Conv1D(32, 3, activation='elu', padding='same', kernel_initializer='Orthogonal', name='conv1d_2')(x)
+    x = layers.Conv1D(32, 3, activation='elu', padding='same', kernel_initializer='Orthogonal', name='conv1d_3')(x)
+    x = layers.Conv1D(32, 3, activation='elu', padding='same', kernel_initializer='Orthogonal', name='conv1d_4')(x)
+    x = layers.MaxPooling1D(2, strides=2, name='maxpool_1')(x)
     x = layers.Dropout(0.5, name='dropout_1')(x)
-
-    # x = layers.Conv1D(32, (2), activation='elu', padding='same', kernel_initializer='orthogonal', name='conv1d_5')(x)
-    # x = layers.Conv1D(32, (2), activation='elu', padding='same', kernel_initializer='orthogonal', name='conv1d_6')(x)
-    # x = layers.Conv1D(32, (2), activation='elu', padding='same', kernel_initializer='orthogonal', name='conv1d_7')(x)
-    # x = layers.Conv1D(32, (2), activation='elu', padding='same', kernel_initializer='orthogonal', name='conv1d_8')(x)
-    # x = layers.Dropout(0.25, name = 'dropout_2')(x)
 
     x = layers.Flatten(name='flatten_1')(x)
 
-    x = layers.Dense(128, activation='tanh')(x)
-    x = layers.Dropout(0.5, name='dropout_3')(x)
+    x = layers.Dense(128, activation='tanh', name = 'dense_1')(x)
+    x = layers.Dropout(0.5, name='dropout_2')(x)
 
-    x = layers.Dense(128, activation='tanh')(x)
-    x = layers.Dropout(0.5, name='dropout_4')(x)
+    x = layers.Dense(64, activation='tanh', name = 'dense_2')(x)
+    x = layers.Dropout(0.5, name='dropout_3')(x)
 
     x = layers.Dense(1, name='dense_final', activation='sigmoid')(x)
 
@@ -166,7 +160,7 @@ def model_twitter_convnet(embedding_matrix, maxlen):
 
 if __name__ == '__main__':
     ## Setting up names
-    network_name = 'conv_smaller_3'  # 'conv_lstm'
+    network_name = 'conv_smaller_6'  # 'conv_lstm'
     sufix = '10000_100'
     network_final_name = network_name + '_' + sufix
 
@@ -180,7 +174,7 @@ if __name__ == '__main__':
     ## Train Network
     history = model.fit(X_train,
                         Y_train,
-                        epochs=10,
+                        epochs=100,
                         batch_size=64,
                         validation_data=(X_val, Y_val),
                         verbose=True)
@@ -190,3 +184,4 @@ if __name__ == '__main__':
 
     ## Ploting results
     get_model_results(history, network_final_name)
+
